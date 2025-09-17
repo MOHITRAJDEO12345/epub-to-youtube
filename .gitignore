@@ -2,3 +2,5 @@
 /__pycache__
 /modules/__pycache__
 /client_secrets.json
+/output
+/token.pickle

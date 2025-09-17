@@ -1,3 +1,4 @@
+# modules/tts_generator.py
 from gtts import gTTS # type: ignore
 import os
 
@@ -27,8 +28,6 @@ def create_audio_file(text, output_filename, language='en', slow=False, tld='com
     except Exception as e:
         print(f"❌ Error generating audio with gTTS: {e}")
         return False
-
-
 
 
 

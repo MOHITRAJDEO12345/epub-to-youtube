@@ -1,3 +1,4 @@
+# modules/youtube_uploader.py
 import os
 import pickle
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -33,9 +34,10 @@ def get_authenticated_service(client_secrets_file):
             
     return build(API_SERVICE_NAME, API_VERSION, credentials=creds)
 
-def upload_to_youtube(video_path, secrets_file, title, description, category_id, tags, privacy_status):
+def upload_to_youtube(video_path, secrets_file, title, description, category_id, tags, privacy_status,
+                      default_language=None, made_for_kids=False, thumbnail_path=None):
     """
-    Uploads a video file to YouTube.
+    Uploads a video file to YouTube with extended options.
     """
     print(f"🚀 Uploading '{title}' to YouTube...")
     try:
@@ -46,10 +48,14 @@ def upload_to_youtube(video_path, secrets_file, title, description, category_id,
                 "title": title,
                 "description": description,
                 "tags": tags,
-                "categoryId": category_id
+                "categoryId": category_id,
+                # New snippet options
+                "defaultLanguage": default_language if default_language else "en" 
             },
             "status": {
-                "privacyStatus": privacy_status
+                "privacyStatus": privacy_status,
+                # New status option
+                "madeForKids": made_for_kids 
             }
         }
 
@@ -62,8 +68,20 @@ def upload_to_youtube(video_path, secrets_file, title, description, category_id,
         )
         
         response = request.execute()
-        print(f"✅ Video uploaded successfully! Video ID: {response['id']}")
-        return response['id']
+        video_id = response['id']
+        print(f"✅ Video uploaded successfully! Video ID: {video_id}")
+
+        # Upload thumbnail if provided
+        if thumbnail_path and os.path.exists(thumbnail_path):
+            print(f"🖼️ Uploading thumbnail from {thumbnail_path}...")
+            thumbnail_media = MediaFileUpload(thumbnail_path)
+            youtube.thumbnails().set(
+                videoId=video_id,
+                media_body=thumbnail_media
+            ).execute()
+            print("✅ Thumbnail uploaded successfully.")
+        
+        return video_id
     except Exception as e:
         print(f"❌ Failed to upload video: {e}")
         return None
